@@ -3,109 +3,92 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+
 public class EnemyController : MonoBehaviour
 {
-    private Transform player;
-    private Rigidbody2D rb;
-    private FieldOfView fov;
-    private NavMeshAgent agent;
-    private LineRenderer line;
+    protected enum State { Patrolling, Chasing}
 
-    int waypointIndex;                  // the current waypoint index in the waypoints array
-    private Transform[] waypoints;       // collection of waypoints which define a patrol area
+    protected Transform player;
+    protected Rigidbody2D rb;
+    protected FieldOfView fov;
+    protected NavMeshAgent agent;
+    protected LineRenderer line;
 
-    float speed;                // current agent speed and NavMeshAgent component speed
-    bool isStuned = false;
-    bool isOutOfZone = false;
+    protected State state;
 
+    protected float speed;                // current agent speed and NavMeshAgent component speed
+    protected bool isOutOfZone = false;
+    protected bool isStuned = false;
 
-    public float aggroRange;
-    public float turnSpeed = 5f;
+    float stunTimer;
 
-    public float patrolTime = 10;       // time in seconds to wait before seeking a new patrol destination
-    
+    [Header("Zone")]
     public Zone zone;
 
     [Space]
+    [Header("Movements")]
+    public float aggroRange;
+    public float turnSpeed = 5f;
+
+    [Space]
     [Header("Timers")]
-    float stunTimer;
-    public float stunTimerSet = 4f;
+    public float stunTimerSet = 3f;
 
-
-    void Start()
+    protected virtual void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
         fov = GetComponent<FieldOfView>();
         rb = GetComponent<Rigidbody2D>();
         agent = GetComponent<NavMeshAgent>();
         line = GetComponent<LineRenderer>();
-        
-
-        stunTimer = stunTimerSet;
-        waypoints = zone.waypointsInZone;
 
         agent.updateRotation = false;
         agent.updateUpAxis = false;
         speed = agent.speed;
+        stunTimer = stunTimerSet;
 
-        InvokeRepeating("Tick", 0, 0.5f);       // Call Tick() repeatedly
-		if (waypoints.Length > 0)       // If more than 1 waypoint
-		{
-			InvokeRepeating("Patrol", Random.Range(0, patrolTime), patrolTime);     // Find the next waypoint
-		}
-
-	}
+        state = State.Patrolling;
+    }
 
     void Update()
     {
-        CheckSatus();
+        CheckState();
         DrawPath();
     }
 
 	private void LateUpdate()
 	{
-        FaceMovingPos();
-    }
-
-    private void FaceMovingPos()
-	{
-        float angle = Mathf.Atan2(agent.velocity.y, agent.velocity.x) * Mathf.Rad2Deg + 90f;
-        Quaternion rotation = Quaternion.Euler(0, 0, angle);
-        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, turnSpeed * Time.deltaTime);
-    }
-
-	private void Patrol()
-    {
-        waypointIndex = waypointIndex == waypoints.Length - 1 ? 0 : waypointIndex + 1;      // If reached the waypoint find the next waypoint
-    }
-
-    private void Tick()
-    {
-		if(isStuned)        // Stop all movement if stunned
-		{
-            agent.speed = 0;
-            agent.destination = Vector3.zero;
-            return;                                 
-		}
-
-        if (player != null && !isOutOfZone &&
-            (fov.visibleTargets.Count > 0 || Physics2D.OverlapCircle(transform.position, aggroRange, fov.targetMask)))     // Check if Player is in aggroRange
-		{
-			agent.speed = speed;                    // Set the destination to the Player
-			agent.destination = player.position;    // Set speed to run
-            return;
-		}
-
-        agent.destination = waypoints[waypointIndex].position;      // Set the destination base on the waypoint
-        agent.speed = speed * 0.5f;                                    // Set speed to walk (agentSpeed / 2)
+		FaceMovingPos();
 	}
 
-    public void Stun()
+	private void FaceMovingPos()
 	{
+		if (agent.velocity == Vector3.zero)
+		{
+			return;
+		}
+
+		float angle = Mathf.Atan2(agent.velocity.y, agent.velocity.x) * Mathf.Rad2Deg - 90f;
+		Quaternion rotation = Quaternion.Euler(0, 0, angle);
+		transform.rotation = Quaternion.Slerp(transform.rotation, rotation, turnSpeed * Time.deltaTime);
+	}
+
+	public void Stun()
+    {
         isStuned = true;
     }
 
-    private void CheckSatus()
+    private bool IsOutOfZone()
+    {
+        float distance = Vector2.Distance(zone.transform.position, transform.position);
+
+        if (distance > zone.zoneRadius)
+            return true;
+
+        return false;
+    }
+
+    protected virtual void CheckState()
 	{
         if (isStuned)
         {
@@ -120,16 +103,25 @@ public class EnemyController : MonoBehaviour
         isOutOfZone = IsOutOfZone();
     }
 
-    private bool IsOutOfZone()
-	{
-        //float distance = isOutOfZone? 0 : Vector2.Distance(zone.transform.position, transform.position);
-        float distance = Vector2.Distance(zone.transform.position, transform.position);
+    protected void Chasing()
+    {
+        if (isStuned)        // Stop all movement if stunned
+        {
+            agent.speed = 0;
+            agent.destination = player.position;
+            return;
+        }
 
-        if (distance > zone.zoneRadius)
-            return true;
-
-        return false;
-	}
+        if (Vector2.Distance(transform.position, player.position) < fov.viewRadius && !isOutOfZone)
+        {
+            agent.speed = speed;                    // Set the destination to the Player
+            agent.destination = player.position;    // Set speed to run
+        }
+        else
+        {
+            state = State.Patrolling;
+        }
+    }
 
     void DrawPath()
     {

@@ -13,8 +13,8 @@ public class FieldOfViewEditor : Editor
 		Handles.color = Color.white;
 		Handles.DrawWireArc(fow.transform.position, Vector3.forward, Vector3.up, 360, fow.viewRadius);      // draw a circle
 
-		Vector3 viewAngleA = fow.DirFromAngle(-fow.viewAngle, false);		// get angle direction
-		Vector3 viewAngleB = fow.DirFromAngle(fow.viewAngle, false);
+		Vector3 viewAngleA = fow.DirFromAngle(-fow.viewAngle/2, false);		// get angle direction
+		Vector3 viewAngleB = fow.DirFromAngle(fow.viewAngle/2, false);
 
 		Handles.DrawLine(fow.transform.position, fow.transform.position + viewAngleA * fow.viewRadius);		// draw a line toward angle direction till the viewRadius
 		Handles.DrawLine(fow.transform.position, fow.transform.position + viewAngleB * fow.viewRadius);

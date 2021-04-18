@@ -19,6 +19,7 @@ public class Flashlight : MonoBehaviour
 	public FLTheshold[] flashLightThresholds;
 
 	public event Action OnBatteryDeplete;
+	public event Action OnEnemyOutOfView;
 
 	private void Start()
 	{
@@ -28,6 +29,11 @@ public class Flashlight : MonoBehaviour
 		viewAtFull = fov.viewAngle;
 		rangeAtFull = fov.viewRadius;
 
+	}
+
+	private void Update()
+	{
+		FreezeStoneStatue();
 	}
 
 	private void LateUpdate()
@@ -67,6 +73,38 @@ public class Flashlight : MonoBehaviour
 		}
 
 		fov.ResetFov();
+	}
+
+	private void FreezeStoneStatue()
+	{
+		if (fov.visibleTargets.Count > 0)
+		{
+			bool seeStatue = false;
+			foreach (Transform target in fov.visibleTargets)
+			{
+				StoneStatue ss = target.GetComponent<StoneStatue>();
+				if (ss != null)
+				{
+					ss.Stun();
+					seeStatue = true;
+				}
+			}
+		}
+	}
+
+	public void StunGhost()
+	{
+		if (fov.visibleTargets.Count > 0)
+		{
+			foreach (Transform target in fov.visibleTargets)
+			{
+				Ghost g = target.GetComponent<Ghost>();
+				if (g != null)
+				{
+					g.Stun();
+				}
+			}
+		}
 	}
 
 	#region GET

@@ -22,9 +22,9 @@ public class FieldOfView : MonoBehaviour
 	[Space]
 	[Header("Mesh")]
 	public Vector3 meshStartpoint = new Vector3(0, 0, 0);
-	public int rayCount;
-	public int edgeResolveRayCount;		// amount of extra raycast to handle edge
-	public float edgeDstThreshold;			// handle multiple edge hit
+	public int rayCount = 50;
+	public int edgeResolveRayCount = 4;		// amount of extra raycast to handle edge
+	public float edgeDstThreshold = 0.5f;			// handle multiple edge hit
 
 	public MeshFilter viewMeshFilter;
 
@@ -42,7 +42,7 @@ public class FieldOfView : MonoBehaviour
 		originViewRadius = viewRadius;
 		originViewAngle = viewAngle;
 
-		StartCoroutine("FindTargetsWithDelay", .1f);
+		StartCoroutine(FindTargetsWithDelay(.1f));
 	}
 
 
@@ -63,16 +63,17 @@ public class FieldOfView : MonoBehaviour
 	void FindVisibleTargets()	
 	{
 		visibleTargets.Clear();
-		Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(transform.position, viewRadius, targetMask);		// Find all targets within viewRadius
+		Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(transform.position, viewRadius, targetMask);      // Find all targets within viewRadius
 
 		for (int i = 0; i < targetsInViewRadius.Length; i++)
 		{
 			Transform target = targetsInViewRadius[i].transform;
-			Vector3 dirToTarget = (transform.position - target.position).normalized;
-			if (Vector3.Angle(transform.up, dirToTarget) < viewAngle)					// Find all target within viewAngle
+			Vector3 dirToTarget = (target.position - transform.position).normalized;
+			if (Vector2.Angle(transform.up, dirToTarget) < viewAngle/2)                   // Find all target within viewAngle
 			{
-				float dstToTarget = Vector3.Distance(transform.position, target.position);
-				if (!Physics.Raycast(transform.position, dirToTarget, dstToTarget, obstacleMask))		// Find all targets not blocked by obstacleMask
+				float dstToTarget = Vector2.Distance(transform.position, target.position);
+
+				if (!Physics2D.Raycast(transform.position, dirToTarget, dstToTarget, obstacleMask))       // Find all targets not blocked by obstacleMask
 				{
 					visibleTargets.Add(target);
 				}
@@ -82,14 +83,14 @@ public class FieldOfView : MonoBehaviour
 
 	void DrawFieldOfView()		// Generate raycast and mesh
 	{
-		float stepAngleSize = viewAngle*2 / rayCount;
+		float stepAngleSize = viewAngle / rayCount;
 		List<Vector3> viewPoints = new List<Vector3>();
 		ViewCastInfo oldViewCast = new ViewCastInfo();
 
 		for (int i = 0; i <= rayCount; i++)
 		{
-			float angle = transform.eulerAngles.z -90f - viewAngle + stepAngleSize * i;
-			ViewCastInfo newViewCast = ViewCast(angle);
+			float angle = transform.eulerAngles.z - viewAngle/2 + stepAngleSize * i;
+			ViewCastInfo newViewCast = ViewCast(-angle);
 
 				if (i > 0)	// skip origin
 				{
@@ -190,9 +191,9 @@ public class FieldOfView : MonoBehaviour
 	{
 		if (!angleIsGlobal)		//If not global, angle will be relative to player
 		{
-			angleInDegrees += transform.eulerAngles.z - 90f;
+			angleInDegrees -= transform.eulerAngles.z;
 		}
-		return new Vector3(Mathf.Cos(angleInDegrees * Mathf.Deg2Rad), Mathf.Sin(angleInDegrees * Mathf.Deg2Rad));
+		return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
 	}
 
 	public void ResetFov()

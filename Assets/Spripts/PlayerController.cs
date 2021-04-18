@@ -7,7 +7,6 @@ public class PlayerController : MonoBehaviour
 {
     private Animator anim;
     private Rigidbody2D rb;
-    private FieldOfView fov;
     private Flashlight fl;
     private SpriteRenderer sr;
 
@@ -53,7 +52,6 @@ public class PlayerController : MonoBehaviour
     {
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
-        fov = GetComponent<FieldOfView>();
         fl = GetComponent<Flashlight>();
         sr = GetComponent<SpriteRenderer>();
 
@@ -99,13 +97,7 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
         {
-            if (fov.visibleTargets.Count > 0)
-            {
-                foreach (Transform target in fov.visibleTargets)
-                {
-                    target.GetComponent<EnemyController>().Stun();
-                }
-            }
+            fl.StunGhost();
         }
 
         if (Input.GetKey(KeyCode.LeftShift))
@@ -142,7 +134,7 @@ public class PlayerController : MonoBehaviour
     private void FaceMousePos()
 	{
         Vector2 lookDir = mousePos - rb.position;
-        float angle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg + 90f;
+        float angle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg - 90f;
         Quaternion rotation = Quaternion.Euler(0, 0, angle);
         transform.rotation = Quaternion.Slerp(transform.rotation, rotation, rotationSpeed * Time.deltaTime);
 
