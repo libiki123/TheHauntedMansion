@@ -43,25 +43,7 @@ public class Ghost : EnemyController
         agent.speed = speed * 0.5f;                                    // Set speed to walk (agentSpeed / 2)
     }
 
-    private void Chasing()
-	{
-        if (isStuned)        // Stop all movement if stunned
-        {
-            agent.speed = 0;
-            agent.destination = Vector3.zero;
-            return;
-        }
 
-        if (Vector2.Distance(transform.position, player.position) < fov.viewRadius && !isOutOfZone)
-        {
-            agent.speed = speed;                    // Set the destination to the Player
-            agent.destination = player.position;    // Set speed to run
-        }
-        else
-        {
-            state = State.Patrolling;
-        }
-    }
 
 	protected override void CheckState()
 	{
@@ -75,7 +57,6 @@ public class Ghost : EnemyController
                 break;
             case State.Chasing:
                 Chasing();
-
                 break;
         }
     }
