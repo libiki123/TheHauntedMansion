@@ -5,7 +5,7 @@ using UnityEngine;
 public class Ghost : EnemyController
 {
     int waypointIndex;                  // the current waypoint index in the waypoints array
-    private Transform[] waypoints;       // collection of waypoints which define a patrol area
+    public Transform[] waypoints;       // collection of waypoints which define a patrol area
 
    
 
@@ -16,7 +16,8 @@ public class Ghost : EnemyController
 	{
 		base.Start();
 
-        waypoints = zone.waypointsInZone;
+        if(waypoints.Length <= 0)
+            waypoints = zone.waypointsInZone;
 
 
         if (waypoints.Length > 0)       // If more than 1 waypoint

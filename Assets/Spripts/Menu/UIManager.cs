@@ -42,7 +42,6 @@ public class UIManager : Manager<UIManager>
         int numberOfHeart = player.GetNumOfHeart();
         float curBattery = player.GetFlCurrentBattery();
         float fullBattery = player.GetFlFullBattery();
-        int curNumOfGem = player.GetCurNumOfGem();
         bool obtainedKey = player.IsKeyObtained();
 
         
@@ -58,7 +57,7 @@ public class UIManager : Manager<UIManager>
 
         flBatteryFill.fillAmount = curBattery / fullBattery;
 
-        gemAmountText.text = curNumOfGem + "/10";       // TO DO: get total number of gem later on
+        gemAmountText.text = ObjectiveManager.Instance.curGemCount + "/" + ObjectiveManager.Instance.totalGem;       // TO DO: get total number of gem later on
 
         if (obtainedKey)
             keyAmountText.text = "1/1";

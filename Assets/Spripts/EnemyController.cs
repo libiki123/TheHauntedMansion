@@ -22,10 +22,6 @@ public class EnemyController : MonoBehaviour
 
     float stunTimer;
 
-    [Header("Zone")]
-    public Zone zone;
-
-    [Space]
     [Header("Movements")]
     public float aggroRange;
     public float turnSpeed = 5f;
@@ -33,6 +29,10 @@ public class EnemyController : MonoBehaviour
     [Space]
     [Header("Timers")]
     public float stunTimerSet = 3f;
+
+    [Space]
+    [Header("Zone")]
+    public Zone zone;
 
     protected virtual void Start()
     {

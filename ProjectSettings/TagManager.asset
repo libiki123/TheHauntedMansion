@@ -4,7 +4,8 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Object
+  - Gem
+  - Key
   layers:
   - Default
   - TransparentFX
@@ -50,4 +51,7 @@ TagManager:
     locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Mask
+    uniqueID: 56145983
     locked: 0

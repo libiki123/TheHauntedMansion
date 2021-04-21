@@ -60,7 +60,8 @@ public class Item : MonoBehaviour
                 }
                 break;
             case ItemType.GEM:
-                playerCl.GiveGem();
+                ObjectiveManager.Instance.curGemCount++;
+                GameManager.Instance.OnPLayerObtainItem();
                 Destroy(gameObject);
                 break;
             case ItemType.KEY:

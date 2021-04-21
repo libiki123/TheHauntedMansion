@@ -20,7 +20,6 @@ public class PlayerController : MonoBehaviour
     private bool isInVulnerable = false;
     private bool isFalling = false;
 
-    private int curGem = 0;
     private bool obtainedKey = false;
 
     public Camera cam;
@@ -59,9 +58,9 @@ public class PlayerController : MonoBehaviour
         immnedTimer = immnedTimerSet;
         blinkTimer = blinkTimerSet;
 
-        fl.OnBatteryDeplete += GameManager.Instance.OnPLayerBatteryDeplete;
-        OnDamaged += GameManager.Instance.OnPlayerDamaged;
-        OnObtainItem += GameManager.Instance.OnPLayerObtainItem;
+        //fl.OnBatteryDeplete += GameManager.Instance.OnPLayerBatteryDeplete;
+        //OnDamaged += GameManager.Instance.OnPlayerDamaged;
+        //OnObtainItem += GameManager.Instance.OnPLayerObtainItem;
 
     }
 
@@ -235,12 +234,6 @@ public class PlayerController : MonoBehaviour
         OnObtainItem?.Invoke();
     }
 
-    public void GiveGem()
-	{
-        curGem += 1;
-        OnObtainItem?.Invoke();
-    }
-
     public void GiveKey()
 	{
         obtainedKey = true;
@@ -269,11 +262,6 @@ public class PlayerController : MonoBehaviour
     public float GetFlFullBattery()
 	{
         return fl.GetFullBattery();
-	}
-
-    public int GetCurNumOfGem()
-	{
-        return curGem;
 	}
 
     public bool IsKeyObtained()
